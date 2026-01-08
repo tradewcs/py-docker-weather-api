@@ -1,19 +1,28 @@
-import requests
 import os
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("API_KEY")
+BASE_URL = "http://api.weatherapi.com/v1/current.json"
 CITY = "Paris"
-URL = f"http://api.weatherapi.com/v1/current.json" \
-      f"?key={API_KEY}&q={CITY}&aqi=no"
 
 
 def get_weather() -> None:
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        print("API_KEY is not set")
+        return
+
+    params = {
+        "key": api_key,
+        "q": CITY,
+        "aqi": "no",
+    }
+
     print(f"Performing request to Weather API for city {CITY}...")
 
-    response = requests.get(URL)
+    response = requests.get(BASE_URL, params=params)
     if response.status_code != 200:
         print("Failed to get weather data.")
         return
@@ -22,12 +31,12 @@ def get_weather() -> None:
 
     location = data["location"]["name"]
     country = data["location"]["country"]
+    localtime = data["location"]["localtime"]
     temp_c = data["current"]["temp_c"]
     condition = data["current"]["condition"]["text"]
-    localtime = data["location"]["localtime"]
 
-    print(f"{location}/{country} {localtime}"
-          f" Weather: {temp_c} Celsius, {condition}")
+    print(f"{location}/{country} {localtime} "
+          f"Weather: {temp_c} Celsius, {condition}")
 
 
 if __name__ == "__main__":
